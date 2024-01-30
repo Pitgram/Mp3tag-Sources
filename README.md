@@ -1,5 +1,4 @@
-- #### Based on [Mp3tag-Sources](https://github.com/Onurtag/Mp3tag-Sources) by [Onurtag](https://github.com/Onurtag)!
-Check [ORIGINAL_README.md](ORIGINAL_README.md) for more information
+#### Based on [Mp3tag-Sources](https://github.com/Onurtag/Mp3tag-Sources) by [Onurtag](https://github.com/Onurtag)! Check [ORIGINAL_README.md](ORIGINAL_README.md) for more information
 
 ## Installation  
 Requires Mp3tag v2.64 or above.  
