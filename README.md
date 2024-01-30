@@ -23,6 +23,7 @@ You can download all .src files using the **Code -> Download ZIP** button.
 - #### VocaDB English Song.src:  
   Should work similar to Album search, but also:
   - Allows to search for songs using both name **and** VocaDB Artist **Tag** (eg. [36280](https://vocadb.net/Ar/36280)) simultaneously to make up for listing maximum 100 search results
+  - Shows info about found songs, including albums containing the song
   - Inserts thumbnail from VocaDB as cover image
   - Code should theoretically be ready to also show thumbnails in search results (primary screen if more than one song is found) when mp3tag will also allow this feature on Windows builds as mentioned [here](https://community.mp3tag.de/t/web-sources-search-thumbnails/59491).
 

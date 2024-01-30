@@ -3,7 +3,7 @@
 [IndexUrl]=https://vocadb.net/api/songs?fields=Names,Albums,Lyrics,MainPicture&nameMatchMode=Auto&start=0&artistParticipationStatus=Everything&maxResults=333&sort=FavoritedTimes&preferAccurateMatches=true&getTotalCount=true&lang=English
 [AlbumUrl]=https://vocadb.net/api/songs/
 [WordSeparator]=%20
-[IndexFormat]=%_coverurl%|%Name%|%Artist%|%Song Type%|%ReleaseDate%|%_preview%|%_url%|
+[IndexFormat]=%_coverurl%|%Name%|%Artist%|%Song Type%|%Albums%|%ReleaseDate%|%_preview%|%_url%|
 [SearchBy]=Title||%title%||&query=%s||VocaDB Artist Code||||&artistId%5B%5D=%s
 [UserAgent]=1
 [Encoding]=url-utf-8
@@ -50,7 +50,16 @@ ifnot "0"
 		#sayregexp "(?<= - ).*"
 		sayrest
 		say "|"	
-
+		
+		# Albums
+		json_foreach "albums"
+			say "\""
+			json_select "name"
+			sayrest
+			say "\" "
+		json_foreach_end
+		say "|"
+		
 		# ReleaseDate
 		json_select "publishDate"
 		#sayregexp "(?<= - ).*"
