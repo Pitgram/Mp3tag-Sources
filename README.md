@@ -13,7 +13,7 @@ You can download all .src files using the **Code -> Download ZIP** button.
 - #### VocaDB English Album.src:    
   - All names, titles and lyrics will be in English if they exist.   
   - JAPANESETITLE and JAPANESEALBUM tags will be added to each song.  
-  - Appends " (Instrumental)" to instrumental track names
+  - Appends "(Instrumental)" to instrumental track names
   - Inserts both ALBUMARTIST and ARTIST in a format that is compatible with id3v2's multiple artists (using "\\\\" separator)
   - Fixes date insertion from original repo
   - Fixes tracks counting
