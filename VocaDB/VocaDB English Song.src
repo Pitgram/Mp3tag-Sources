@@ -1,30 +1,20 @@
-# ###################################################################
-#
-# UtaiteDB version of "Vocadb Original Tags.src"
-#
-# This file should be stored in your tag sources sources directory
-# %APPDATA%\Mp3tag\data\sources
-# and requires Mp3tag v2.64 or above.
-#
-# ###################################################################
-
-[Name]=UtaiteDB
-[BasedOn]=UtaiteDB.net
-[IndexUrl]=https://UtaiteDB.net/api/albums?fields=AdditionalNames,Tags,Tracks,Names,MainPicture&nameMatchMode=Auto&maxResults=50&preferAccurateMatches=true&getTotalCount=true&lang=Default&query=%s
-[AlbumUrl]=https://UtaiteDB.net/api/albums/
+[Name]=VocaDB
+[BasedOn]=vocadb.net
+[IndexUrl]=https://vocadb.net/api/songs?fields=Names,Albums,Lyrics,MainPicture&nameMatchMode=Auto&start=0&artistParticipationStatus=Everything&maxResults=333&sort=FavoritedTimes&preferAccurateMatches=true&getTotalCount=true&lang=English
+[AlbumUrl]=https://vocadb.net/api/songs/
 [WordSeparator]=%20
-[IndexFormat]=%Artist%|%Album%|%Release_Date%|%Catalog_Number%|%_preview%|%_url%|%tracks%
-[SearchBy]=%album%
+[IndexFormat]=%_coverurl%|%Name%|%Artist%|%Song Type%|%ReleaseDate%|%_preview%|%_url%|
+[SearchBy]=Title||%title%||&query=%s||VocaDB Artist Code||||&artistId%5B%5D=%s
 [UserAgent]=1
 [Encoding]=url-utf-8
-
 [ParserScriptIndex]=...
+
 # ###################################################################
 #					I  N  D  E  X
 # ###################################################################
 
-# Debug "on" "D:\\KeepThisEmpty\\UTAITEDB_orig_DEBUG.json"
-# DebugWriteInput "D:\\KeepThisEmpty\\UTAITEDB_orig.json"
+# Debug "on" "C:\\temp\\vocadb_english_DEBUG.json"
+# DebugWriteInput "C:\\temp\\vocadb_english.json"
 
 # replace problematic characters for Mp3tag
 replace "|" "$verticalBar()"
@@ -36,33 +26,39 @@ json_select "totalCount"
 ifnot "0"
 	json_foreach "items"
 		
+		# Coverurl
+		json_select_object "mainPicture"
+			json_select "urlThumb"
+			sayrest
+			say "|"
+		json_unselect_object
+		
+		# Name
+		json_select "name"
+		#sayregexp "(?<= - ).*"
+		sayrest
+		say "|"		
+		
 		# Artist
 		json_select "artistString"
 		#sayregexp ".+?(?= -.*)"
 		sayrest
 		say "|" 
-
-		# Album
-		json_select "defaultName"
+		
+		# Type
+		json_select "songType"
 		#sayregexp "(?<= - ).*"
 		sayrest
-		say "|"
+		say "|"	
 
 		# ReleaseDate
-		json_select_object "releaseDate"
-			json_select "formatted"
-			sayrest
-			say "|"
-		json_unselect_object
-
-		# Catalog_Number
-		json_select "catalogNumber"
-		sayrest
+		json_select "publishDate"
+		#sayregexp "(?<= - ).*"
+		SayUntil "T"
 		say "|"
 
-
 		# Preview
-		say "https://www.UtaiteDB.net/Al/"
+		say "https://vocadb.net/S/"
 		json_select "id"
 		sayrest
 		say "|"
@@ -70,16 +66,8 @@ ifnot "0"
 		# URL
 		json_select "id"
 		sayrest
-		say "?fields=Tracks,Names&lang=Default&songFields=Lyrics"
+		say "?fields=Albums,Lyrics,MainPicture,Names&lang=English&songFields=Lyrics"
 		say "|"
-
-		# Tracks
-		json_foreach "tracks"
-			set "t_tracks"
-			json_select "trackNumber"
-			outputto "t_tracks"
-		json_foreach_end
-		outputto "Output"
 		sayrest
 		saynewline
 
@@ -91,8 +79,8 @@ endif
 #					A  L  B  U  M
 # ###################################################################
 
-# Debug "on" "D:\\KeepThisEmpty\\UTAITEDB_orig_single_DEBUG.json"
-# DebugWriteInput "D:\\KeepThisEmpty\\UTAITEDB_orig_single.json"
+# Debug "on" "C:\\temp\\vocadb_english_single_DEBUG.json"
+# DebugWriteInput "C:\\temp\\vocadb_english_single.json"
 
 # replace problematic characters for Mp3tag
 replace "|" "$verticalBar()"
@@ -106,21 +94,17 @@ json_select_object "items"
 	json_select "name"
 	sayrest
 
-	# # Default Album Name (JP) into JAPANESEALBUM tag
-	# outputto "JAPANESEALBUM"
-	# json_select "defaultName"
-	# sayrest
-
-	# UTAITEDB_ID
-	outputto "UTAITEDB_ID"
-	json_select "id"
+	# Default Album Name (JP) into JAPANESEALBUM tag
+	outputto "JAPANESEALBUM"
+	json_select "defaultName"
 	sayrest
 
 	# Coverurl
 	outputto "coverurl"
-	json_select "id"
-	say "https://UtaiteDB.net/Album/CoverPicture/"
-	sayrest
+	json_select_object "mainPicture"
+		json_select "urlOriginal"
+		sayrest
+	json_unselect_object
 
 	# Catalog Number
 	outputto "CATALOGID"
@@ -140,19 +124,14 @@ json_select_object "items"
 
 	# Year
 	outputto "YEAR"
-	json_select_object "releaseDate"
-		json_select "year"
-		sayrest
-		say "."
-		json_select "month"
-		sayrest
-		say "."
-		json_select "day"
-		sayrest
-	json_unselect_object
+	json_select "publishDate"
+	replace "-" "."
+	SayUntil "T"
 
 	outputto "ALBUMARTIST"
 	json_select "artistString"
+	replace " feat. " "\\\\"
+	replace ", " "\\\\"
 	sayrest
 
 	# Names and sortnames
@@ -182,10 +161,10 @@ json_select_object "items"
 		sayrest
 		# # Don't say | here because we do it after (Instrumental)
 		# say "|"
-
+			
 		json_select_object "song"
-			# UTAITEDB_TRACK_ID
-			outputto "UTAITEDB_TRACK_ID"
+			# VOCADB_TRACK_ID
+			outputto "VOCADB_TRACK_ID"
 			json_select "id"
 			sayrest
 			say "|"
@@ -197,6 +176,8 @@ json_select_object "items"
 
 			outputto "Artist"
 			json_select "artistString"
+			replace " feat. " "\\\\"
+			replace ", " "\\\\"
 			sayrest
 			say "|"
 
@@ -208,20 +189,20 @@ json_select_object "items"
 			endif
 			say "|"
 
-			# # Default Title (JP) into JAPANESETITLE tag
-			# outputto "JAPANESETITLE"
-			# json_select "defaultName"
-			# sayrest
-			# say "|"
+			# Default Title (JP) into JAPANESETITLE tag
+			outputto "JAPANESETITLE"
+			json_select "defaultName"
+			sayrest
+			say "|"
 
-			# Original Lyrics into UNSYNCEDLYRICS tag
+			# Romanized Lyrics into UNSYNCEDLYRICS tag
 			#START lyrics block
 			outputto "UNSYNCEDLYRICS"
 			json_foreach "lyrics"
 				ifnot "0"
 					#parse lyric types for translationType: "Original"
 					json_select "translationType"
-					if "Original"
+					if "Romanized"
 						json_select "value"
 						sayrest
 					endif
@@ -236,11 +217,11 @@ json_select_object "items"
 	set "tmp_join"
 
 	###
-	# UtaiteDB specific tags
+	# VocaDB specific tags
 	###
 
 	# Release event
-	outputto "UTAITEDB_RELEASE_EVENT"
+	outputto "VOCADB_RELEASE_EVENT"
 	json_select "releaseEvent"
 	sayrest
 json_unselect_object

@@ -1,6 +1,6 @@
 # ###################################################################
-# 
-# UtaiteDB version of "VocaDB Album ID Original Tags.src"
+#
+# UtaiteDB version of "UtaiteDB English Tags.src"
 #
 # This file should be stored in your tag sources sources directory
 # %APPDATA%\Mp3tag\data\sources
@@ -10,19 +10,98 @@
 
 [Name]=UtaiteDB
 [BasedOn]=UtaiteDB.net
-[AlbumUrl]=https://UtaiteDB.net/api/albums/%s?fields=AdditionalNames,Tags,Tracks,Names,MainPicture&lang=Default
+[IndexUrl]=https://UtaiteDB.net/api/albums?fields=AdditionalNames,Tags,Tracks,Names,MainPicture&nameMatchMode=Auto&maxResults=50&preferAccurateMatches=true&getTotalCount=true&lang=English&query=%s
+[AlbumUrl]=https://UtaiteDB.net/api/albums/
 [WordSeparator]=%20
-[SearchBy]=Enter Album ID||%UTAITEDB_ID%||%s
+[IndexFormat]=%Artist%|%Album%|%Original%|%Release_Date%|%Catalog_Number%|%_preview%|%_url%|%tracks%
+[SearchBy]=Album||$if2(%album%,%title%)||
 [UserAgent]=1
 [Encoding]=url-utf-8
+
+[ParserScriptIndex]=...
+# ###################################################################
+#					I  N  D  E  X
+# ###################################################################
+
+# Debug "on" "D:\\KeepThisEmpty\\UTAITEDB_english_DEBUG.json"
+# DebugWriteInput "D:\\KeepThisEmpty\\UTAITEDB_english.json"
+
+# replace problematic characters for Mp3tag
+replace "|" "$verticalBar()"
+# use "current" json (applies replacements above)
+json "ON" "current"
+
+json_select "totalCount"
+
+ifnot "0"
+	json_foreach "items"
+		
+		# Artist
+		json_select "artistString"
+		#sayregexp ".+?(?= -.*)"
+		sayrest
+		say "|" 
+
+		# Album
+		json_select "name"
+		#sayregexp "(?<= - ).*"
+		sayrest
+		say "|"
+		
+		# Original
+		json_select "defaultName"
+		#sayregexp "(?<= - ).*"
+		sayrest
+		say "|"
+
+		# ReleaseDate
+		json_select_object "releaseDate"
+			json_select "year"
+			sayrest
+			say "."
+			json_select "month"
+			sayrest
+			say "."
+			json_select "day"
+			sayrest
+			say "|"
+		json_unselect_object
+
+		# Catalog_Number
+		json_select "catalogNumber"
+		sayrest
+		say "|"
+
+		# Preview
+		say "https://UtaiteDB.net/Al/"
+		json_select "id"
+		sayrest
+		say "|"
+
+		# URL
+		json_select "id"
+		sayrest
+		say "?fields=Tracks,Names&lang=English&songFields=Lyrics"
+		say "|"
+
+		# Tracks
+		set "total_tracks"
+		json_select_many_count "tracks" "trackNumber"
+		outputto "total_tracks"
+		outputto "Output"
+		sayrest
+		saynewline
+
+	json_foreach_end
+endif
 
 [ParserScriptAlbum]=...
 # ###################################################################
 #					A  L  B  U  M
 # ###################################################################
 
-# Debug "on" "D:\\KeepThisEmpty\\UTAITEDB_orig_single_DEBUG.json"
-# DebugWriteInput "D:\\KeepThisEmpty\\UTAITEDB_orig_single.json"
+# Debug "on" "D:\\KeepThisEmpty\\UTAITEDB_english_single_DEBUG.json"
+# DebugWriteInput "D:\\KeepThisEmpty\\UTAITEDB_english_single.json"
 
 # replace problematic characters for Mp3tag
 replace "|" "$verticalBar()"
@@ -36,10 +115,10 @@ json_select_object "items"
 	json_select "name"
 	sayrest
 
-	# # Default Album Name (JP) into JAPANESEALBUM tag
-	# outputto "JAPANESEALBUM"
-	# json_select "defaultName"
-	# sayrest
+	# Default Album Name (JP) into JAPANESEALBUM tag
+	outputto "JAPANESEALBUM"
+	json_select "defaultName"
+	sayrest
 
 	# UTAITEDB_ID
 	outputto "UTAITEDB_ID"
@@ -83,6 +162,8 @@ json_select_object "items"
 
 	outputto "ALBUMARTIST"
 	json_select "artistString"
+	replace " feat. " "\\\\"
+	replace ", " "\\\\"
 	sayrest
 
 	# Names and sortnames
@@ -127,6 +208,8 @@ json_select_object "items"
 
 			outputto "Artist"
 			json_select "artistString"
+			replace " feat. " "\\\\"
+			replace ", " "\\\\"
 			sayrest
 			say "|"
 
@@ -138,20 +221,20 @@ json_select_object "items"
 			endif
 			say "|"
 
-			# # Default Title (JP) into JAPANESETITLE tag
-			# outputto "JAPANESETITLE"
-			# json_select "defaultName"
-			# sayrest
-			# say "|"
+			# Default Title (JP) into JAPANESETITLE tag
+			outputto "JAPANESETITLE"
+			json_select "defaultName"
+			sayrest
+			say "|"
 
-			# Original Lyrics into UNSYNCEDLYRICS tag
+			# Romanized Lyrics into UNSYNCEDLYRICS tag
 			#START lyrics block
 			outputto "UNSYNCEDLYRICS"
 			json_foreach "lyrics"
 				ifnot "0"
 					#parse lyric types for translationType: "Original"
 					json_select "translationType"
-					if "Original"
+					if "Romanized"
 						json_select "value"
 						sayrest
 					endif

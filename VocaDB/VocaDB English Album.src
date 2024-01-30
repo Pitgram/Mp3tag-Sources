@@ -1,6 +1,6 @@
 # ###################################################################
 # Mp3tag Tag Source for VocaDB
-# Original (usually Japanese) tags source
+# Romaji tags source
 #
 # Search by ALBUM
 #
@@ -8,30 +8,42 @@
 # %APPDATA%\Mp3tag\data\sources
 # and requires Mp3tag v2.64 or above.
 #
+# [2015-08-31] v1.00
+#
+# [2021-11-05] v1.10
+# - now adds DISCNUMBER and TRACK fields for albums with multiple discs
+# [2021-11-08] v1.13
+# - now adds JAPANESETITLE and JAPANESEALBUM tags using the defaultName fields (usually in Japanese)
+#
 # [2022-01-19] v1.20
-# Created VocaDB#Original &Tags.src from VocaDB.src v1.13.
-# Differences from VocaDB#Romaji Tags: 
-# - Album search shows Default (usually Japanese) names
-# - All names and titles will all be in the original language of the song.
-# - lyrics will be in the original language
+# Renamed to VocaDB#&Romaji Tags.src. You can find it in the VocaDB side menu.
+# Added tags:
+# UNSYNCEDLYRICS: tags Romaji lyrics to each song
+# VOCADB_TRACK_ID: tags vocadb track id to each song
 #
 # [2022-01-19] v1.21
 # Add month and day to year tag
-#
+# 
 # [2022-03-23] v1.22
 # Now adds " (Instrumental)" to Instrumental song titles.
-# 
-# (further updates will be listed on the git commit log: https://github.com/Onurtag/Mp3tag-Sources )
 #
+# (further updates will be listed on the git commit log: https://github.com/Onurtag/Mp3tag-Sources )
+# 
+# [2024-01-15] v1.23
+# Howdy! Pitgram here. I modified the script, so that it uses English instead of romaji and so that it inserts both ALBUMARTIST and ARTIST in a format that is compatible with id3v2's multiple artists
+#
+# [2024-01-29]
+# Fixed date, redesigned album listing, added autofill rules, added english album name, fixed track counting
+# 
 # ###################################################################
 
 [Name]=VocaDB
 [BasedOn]=vocadb.net
-[IndexUrl]=https://vocadb.net/api/albums?fields=AdditionalNames,Tags,Tracks,Names,MainPicture&nameMatchMode=Auto&maxResults=50&preferAccurateMatches=true&getTotalCount=true&lang=Default&query=%s
+[IndexUrl]=https://vocadb.net/api/albums?fields=AdditionalNames,Tags,Tracks,Names,MainPicture&nameMatchMode=Auto&maxResults=50&preferAccurateMatches=true&getTotalCount=true&lang=English&query=%s
 [AlbumUrl]=https://vocadb.net/api/albums/
 [WordSeparator]=%20
-[IndexFormat]=%Artist%|%Album%|%Release_Date%|%Catalog_Number%|%_preview%|%_url%|%tracks%
-[SearchBy]=%album%
+[IndexFormat]=%Artist%|%Album%|%Original%|%Release_Date%|%Catalog_Number%|%_preview%|%_url%|%tracks%
+[SearchBy]=Album||$if2(%album%,%title%)||
 [UserAgent]=1
 [Encoding]=url-utf-8
 
@@ -40,8 +52,8 @@
 #					I  N  D  E  X
 # ###################################################################
 
-# Debug "on" "D:\\KeepThisEmpty\\vocadb_orig_DEBUG.json"
-# DebugWriteInput "D:\\KeepThisEmpty\\vocadb_orig.json"
+# Debug "on" "D:\\KeepThisEmpty\\vocadb_english_DEBUG.json"
+# DebugWriteInput "D:\\KeepThisEmpty\\vocadb_english.json"
 
 # replace problematic characters for Mp3tag
 replace "|" "$verticalBar()"
@@ -60,6 +72,12 @@ ifnot "0"
 		say "|" 
 
 		# Album
+		json_select "name"
+		#sayregexp "(?<= - ).*"
+		sayrest
+		say "|"
+		
+		# Original
 		json_select "defaultName"
 		#sayregexp "(?<= - ).*"
 		sayrest
@@ -67,7 +85,13 @@ ifnot "0"
 
 		# ReleaseDate
 		json_select_object "releaseDate"
-			json_select "formatted"
+			json_select "year"
+			sayrest
+			say "."
+			json_select "month"
+			sayrest
+			say "."
+			json_select "day"
 			sayrest
 			say "|"
 		json_unselect_object
@@ -79,7 +103,7 @@ ifnot "0"
 
 
 		# Preview
-		say "https://www.vocadb.net/Al/"
+		say "https://vocadb.net/Al/"
 		json_select "id"
 		sayrest
 		say "|"
@@ -87,15 +111,13 @@ ifnot "0"
 		# URL
 		json_select "id"
 		sayrest
-		say "?fields=Tracks,Names&lang=Default&songFields=Lyrics"
+		say "?fields=Tracks,Names&lang=English&songFields=Lyrics"
 		say "|"
 
 		# Tracks
-		json_foreach "tracks"
-			set "t_tracks"
-			json_select "trackNumber"
-			outputto "t_tracks"
-		json_foreach_end
+		set "total_tracks"
+		json_select_many_count "tracks" "trackNumber"
+		outputto "total_tracks"
 		outputto "Output"
 		sayrest
 		saynewline
@@ -108,8 +130,8 @@ endif
 #					A  L  B  U  M
 # ###################################################################
 
-# Debug "on" "D:\\KeepThisEmpty\\vocadb_orig_single_DEBUG.json"
-# DebugWriteInput "D:\\KeepThisEmpty\\vocadb_orig_single.json"
+# Debug "on" "D:\\KeepThisEmpty\\vocadb_english_single_DEBUG.json"
+# DebugWriteInput "D:\\KeepThisEmpty\\vocadb_english_single.json"
 
 # replace problematic characters for Mp3tag
 replace "|" "$verticalBar()"
@@ -123,10 +145,10 @@ json_select_object "items"
 	json_select "name"
 	sayrest
 
-	# # Default Album Name (JP) into JAPANESEALBUM tag
-	# outputto "JAPANESEALBUM"
-	# json_select "defaultName"
-	# sayrest
+	# Default Album Name (JP) into JAPANESEALBUM tag
+	outputto "JAPANESEALBUM"
+	json_select "defaultName"
+	sayrest
 
 	# VOCADB_ID
 	outputto "VOCADB_ID"
@@ -170,6 +192,8 @@ json_select_object "items"
 
 	outputto "ALBUMARTIST"
 	json_select "artistString"
+	replace " feat. " "\\\\"
+	replace ", " "\\\\"
 	sayrest
 
 	# Names and sortnames
@@ -214,6 +238,8 @@ json_select_object "items"
 
 			outputto "Artist"
 			json_select "artistString"
+			replace " feat. " "\\\\"
+			replace ", " "\\\\"
 			sayrest
 			say "|"
 
@@ -225,20 +251,20 @@ json_select_object "items"
 			endif
 			say "|"
 
-			# # Default Title (JP) into JAPANESETITLE tag
-			# outputto "JAPANESETITLE"
-			# json_select "defaultName"
-			# sayrest
-			# say "|"
+			# Default Title (JP) into JAPANESETITLE tag
+			outputto "JAPANESETITLE"
+			json_select "defaultName"
+			sayrest
+			say "|"
 
-			# Original Lyrics into UNSYNCEDLYRICS tag
+			# Romanized Lyrics into UNSYNCEDLYRICS tag
 			#START lyrics block
 			outputto "UNSYNCEDLYRICS"
 			json_foreach "lyrics"
 				ifnot "0"
 					#parse lyric types for translationType: "Original"
 					json_select "translationType"
-					if "Original"
+					if "Romanized"
 						json_select "value"
 						sayrest
 					endif
