@@ -39,3 +39,5 @@ They are exactly the same as VocaDB sources.
 ---
 
 - #### Many thanks to the author of VocaDB.src **PBX_g33k** from [mp3tag forums](https://community.mp3tag.de/t/ws-vocadb-net/17192).
+
+- #### Based on [Mp3tag-Sources](https://github.com/Onurtag/Mp3tag-Sources) by [Onurtag](https://github.com/Onurtag)!
