@@ -132,8 +132,8 @@ endif
 #					A  L  B  U  M
 # ###################################################################
 
-Debug "on" "C:\\KeepThisEmpty\\VOCADB_english_single_DEBUG.json"
-DebugWriteInput "C:\\KeepThisEmpty\\VOCADB_english_single.json"
+# Debug "on" "C:\\KeepThisEmpty\\VOCADB_english_single_DEBUG.json"
+# DebugWriteInput "C:\\KeepThisEmpty\\VOCADB_english_single.json"
 
 # replace problematic characters for Mp3tag
 replace "|" "$verticalBar()"
