@@ -1,30 +1,20 @@
-# ###################################################################
-#
-# UtaiteDB version of "VocaDB English Album.src"
-#
-# This file should be stored in your tag sources sources directory
-# %APPDATA%\Mp3tag\data\sources
-# and requires Mp3tag v2.64 or above.
-#
-# ###################################################################
-
-[Name]=UtaiteDB
-[BasedOn]=UtaiteDB.net
-[IndexUrl]=https://utaitedb.net/api/albums?fields=AdditionalNames,Tags,Tracks,Names,MainPicture&nameMatchMode=Auto&maxResults=50&preferAccurateMatches=true&getTotalCount=true&lang=English&query=%s
-[AlbumUrl]=https://utaitedb.net/api/albums/
+[Name]=VTouhouDB
+[BasedOn]=touhoudb.com
+[IndexUrl]=https://touhoudb.com/api/songs?fields=Names,Albums,Lyrics,MainPicture&nameMatchMode=Auto&start=0&artistParticipationStatus=Everything&maxResults=333&sort=FavoritedTimes&preferAccurateMatches=true&getTotalCount=true&lang=English
+[AlbumUrl]=https://touhoudb.com/api/songs/
 [WordSeparator]=%20
-[IndexFormat]=%Artist%|%Album%|%Original%|%Release_Date%|%Catalog_Number%|%_preview%|%_url%|%tracks%
-[SearchBy]=Album||$if2(%album%,%title%)||
+[IndexFormat]=%_coverurl%|%Name%|%Artist%|%Song Type%|%Albums%|%ReleaseDate%|%_preview%|%_url%|
+[SearchBy]=Title||%title%||&query=%s||TouhouDB Artist Code||||&artistId%5B%5D=%s
 [UserAgent]=1
 [Encoding]=url-utf-8
-
 [ParserScriptIndex]=...
+
 # ###################################################################
 #					I  N  D  E  X
 # ###################################################################
 
-# Debug "on" "C:\\KeepThisEmpty\\UTAITEDB_english_DEBUG.json"
-# DebugWriteInput "C:\\KeepThisEmpty\\UTAITEDB_english.json"
+# Debug "on" "C:\\temp\\touhoudb_english_DEBUG.json"
+# DebugWriteInput "C:\\temp\\touhoudb_english.json"
 
 # replace problematic characters for Mp3tag
 replace "|" "$verticalBar()"
@@ -36,44 +26,48 @@ json_select "totalCount"
 ifnot "0"
 	json_foreach "items"
 		
+		# Coverurl
+		json_select_object "mainPicture"
+			json_select "urlThumb"
+			sayrest
+			say "|"
+		json_unselect_object
+		
+		# Name
+		json_select "name"
+		#sayregexp "(?<= - ).*"
+		sayrest
+		say "|"		
+		
 		# Artist
 		json_select "artistString"
 		#sayregexp ".+?(?= -.*)"
 		sayrest
 		say "|" 
-
-		# Album
-		json_select "name"
+		
+		# Type
+		json_select "songType"
 		#sayregexp "(?<= - ).*"
 		sayrest
+		say "|"	
+		
+		# Albums
+		json_foreach "albums"
+			say "\""
+			json_select "name"
+			sayrest
+			say "\" "
+		json_foreach_end
 		say "|"
 		
-		# Original
-		json_select "defaultName"
-		#sayregexp "(?<= - ).*"
-		sayrest
-		say "|"
-
 		# ReleaseDate
-		json_select_object "releaseDate"
-			json_select "year"
-			sayrest
-			say "."
-			json_select "month"
-			sayrest
-			say "."
-			json_select "day"
-			sayrest
-			say "|"
-		json_unselect_object
-
-		# Catalog_Number
-		json_select "catalogNumber"
-		sayrest
+		json_select "publishDate"
+		#sayregexp "(?<= - ).*"
+		SayUntil "T"
 		say "|"
-		
+
 		# Preview
-		say "https://UtaiteDB.net/Al/"
+		say "https://touhoudb.com/S/"
 		json_select "id"
 		sayrest
 		say "|"
@@ -81,14 +75,8 @@ ifnot "0"
 		# URL
 		json_select "id"
 		sayrest
-		say "?fields=Tracks,Names,ReleaseEvent&lang=English&songFields=Lyrics"
+		say "?fields=Albums,Lyrics,MainPicture,Names&lang=English&songFields=Lyrics"
 		say "|"
-
-		# Tracks
-		set "total_tracks"
-		json_select_many_count "tracks" "trackNumber"
-		outputto "total_tracks"
-		outputto "Output"
 		sayrest
 		saynewline
 
@@ -100,8 +88,8 @@ endif
 #					A  L  B  U  M
 # ###################################################################
 
-# Debug "on" "C:\\KeepThisEmpty\\UTAITEDB_english_single_DEBUG.json"
-# DebugWriteInput "C:\\KeepThisEmpty\\UTAITEDB_english_single.json"
+# Debug "on" "C:\\temp\\touhoudb._english_single_DEBUG.json"
+# DebugWriteInput "C:\\temp\\touhoudb._english_single.json"
 
 # replace problematic characters for Mp3tag
 replace "|" "$verticalBar()"
@@ -120,21 +108,12 @@ json_select_object "items"
 	json_select "defaultName"
 	sayrest
 
-	# UTAITEDB_ID
-	outputto "UTAITEDB_ID"
-	json_select "id"
-	sayrest
-
-	# Release event
-		outputto "UTAITEDB_RELEASE_EVENT"
-		json_select_many "releaseEvents" "name" "\\\\"
-		sayrest
-
 	# Coverurl
 	outputto "coverurl"
-	json_select "id"
-	say "https://utaitedb.net/Album/CoverPicture/"
-	sayrest
+	json_select_object "mainPicture"
+		json_select "urlOriginal"
+		sayrest
+	json_unselect_object
 
 	# Catalog Number
 	outputto "CATALOGID"
@@ -154,16 +133,9 @@ json_select_object "items"
 
 	# Year
 	outputto "YEAR"
-	json_select_object "releaseDate"
-		json_select "year"
-		sayrest
-		say "."
-		json_select "month"
-		sayrest
-		say "."
-		json_select "day"
-		sayrest
-	json_unselect_object
+	json_select "publishDate"
+	replace "-" "."
+	SayUntil "T"
 
 	outputto "ALBUMARTIST"
 	json_select "artistString"
@@ -198,10 +170,10 @@ json_select_object "items"
 		sayrest
 		# # Don't say | here because we do it after (Instrumental)
 		# say "|"
-
+			
 		json_select_object "song"
-			# UTAITEDB_TRACK_ID
-			outputto "UTAITEDB_TRACK_ID"
+			# TOUHOUDB_TRACK_ID
+			outputto "TOUHOUDB_TRACK_ID"
 			json_select "id"
 			sayrest
 			say "|"

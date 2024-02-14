@@ -1,49 +1,17 @@
 # ###################################################################
-# Mp3tag Tag Source for VocaDB
-# Romaji tags source
 #
-# Search by ALBUM
+# TouhouDB version of "VocaDB English Album.src"
 #
 # This file should be stored in your tag sources sources directory
 # %APPDATA%\Mp3tag\data\sources
 # and requires Mp3tag v2.64 or above.
 #
-# [2015-08-31] v1.00
-#
-# [2021-11-05] v1.10
-# - now adds DISCNUMBER and TRACK fields for albums with multiple discs
-# [2021-11-08] v1.13
-# - now adds JAPANESETITLE and JAPANESEALBUM tags using the defaultName fields (usually in Japanese)
-#
-# [2022-01-19] v1.20
-# Renamed to VocaDB#&Romaji Tags.src. You can find it in the VocaDB side menu.
-# Added tags:
-# UNSYNCEDLYRICS: tags Romaji lyrics to each song
-# VOCADB_TRACK_ID: tags vocadb track id to each song
-#
-# [2022-01-19] v1.21
-# Add month and day to year tag
-# 
-# [2022-03-23] v1.22
-# Now adds " (Instrumental)" to Instrumental song titles.
-#
-# (further updates will be listed on the git commit log: https://github.com/Onurtag/Mp3tag-Sources )
-# 
-# [2024-01-15] v1.23
-# Howdy! Pitgram here. I modified the script, so that it uses English instead of romaji and so that it inserts both ALBUMARTIST and ARTIST in a format that is compatible with id3v2's multiple artists
-#
-# [2024-01-29]
-# Fixed date, redesigned album listing, added autofill rules, added english album name, fixed track counting
-#
-# [2024-02-14]
-# Release events are now inserted into VOCADB_RELEASE_EVENT custom tag, multiple events are supported and by default are separated by "\\" separator, to change this to for example "; " look into "# Release event" section of the code
-# 
 # ###################################################################
 
-[Name]=VocaDB
-[BasedOn]=vocadb.net
-[IndexUrl]=https://vocadb.net/api/albums?fields=AdditionalNames,Tags,Tracks,Names,ReleaseEvent,MainPicture&nameMatchMode=Auto&maxResults=50&preferAccurateMatches=true&getTotalCount=true&lang=English&query=%s
-[AlbumUrl]=https://vocadb.net/api/albums/
+[Name]=TouhouDB
+[BasedOn]=touhoudb.com
+[IndexUrl]=https://touhoudb.com/api/albums?fields=AdditionalNames,Tags,Tracks,Names,ReleaseEvent,MainPicture&nameMatchMode=Auto&maxResults=50&getTotalCount=true&lang=English&query=%s
+[AlbumUrl]=https://touhoudb.com/api/albums/
 [WordSeparator]=%20
 [IndexFormat]=%Artist%|%Album%|%Original%|%Release_Date%|%Catalog_Number%|%_preview%|%_url%|%tracks%
 [SearchBy]=Album||$if2(%album%,%title%)||
@@ -55,8 +23,8 @@
 #					I  N  D  E  X
 # ###################################################################
 
-# Debug "on" "C:\\KeepThisEmpty\\vocadb_english_DEBUG.json"
-# DebugWriteInput "C:\\KeepThisEmpty\\vocadb_english.json"
+# Debug "on" "C:\\KeepThisEmpty\\touhoudb_english_DEBUG.json"
+# DebugWriteInput "C:\\KeepThisEmpty\\touhoudb_english.json"
 
 # replace problematic characters for Mp3tag
 replace "|" "$verticalBar()"
@@ -105,7 +73,7 @@ ifnot "0"
 		say "|"
 
 		# Preview
-		say "https://vocadb.net/Al/"
+		say "https://touhoudb.com/Al/"
 		json_select "id"
 		sayrest
 		say "|"
@@ -132,8 +100,8 @@ endif
 #					A  L  B  U  M
 # ###################################################################
 
-Debug "on" "C:\\KeepThisEmpty\\VOCADB_english_single_DEBUG.json"
-DebugWriteInput "C:\\KeepThisEmpty\\VOCADB_english_single.json"
+# Debug "on" "D:\\KeepThisEmpty\\touhoudb_english_single_DEBUG.json"
+# DebugWriteInput "D:\\KeepThisEmpty\\touhoudb_english_single.json"
 
 # replace problematic characters for Mp3tag
 replace "|" "$verticalBar()"
@@ -152,20 +120,20 @@ json_select_object "items"
 	json_select "defaultName"
 	sayrest
 
-	# VOCADB_ID
-	outputto "VOCADB_ID"
+	# TOUHOUDB_ID
+	outputto "TOUHOUDB_ID"
 	json_select "id"
 	sayrest
 
 	# Release event
-		outputto "VOCADB_RELEASE_EVENT"
+		outputto "TOUHOUDB_RELEASE_EVENT"
 		json_select_many "releaseEvents" "name" "\\\\"
 		sayrest
 
 	# Coverurl
 	outputto "coverurl"
 	json_select "id"
-	say "https://vocadb.net/Album/CoverPicture/"
+	say "https://touhoudb.com/Album/CoverPicture/"
 	sayrest
 
 	# Catalog Number
@@ -232,8 +200,8 @@ json_select_object "items"
 		# say "|"
 
 		json_select_object "song"
-			# VOCADB_TRACK_ID
-			outputto "VOCADB_TRACK_ID"
+			# TOUHOUDB_TRACK_ID
+			outputto "TOUHOUDB_TRACK_ID"
 			json_select "id"
 			sayrest
 			say "|"
