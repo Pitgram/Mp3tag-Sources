@@ -1,4 +1,4 @@
-#### Based on [Mp3tag-Sources](https://github.com/Onurtag/Mp3tag-Sources) by [Onurtag](https://github.com/Onurtag) that is based on [original script](https://community.mp3tag.de/t/ws-vocadb-net/17192) by PBX_g33k! Check [ORIGINAL_README.md](ORIGINAL_README.md) for more information
+#### Based on [Mp3tag-Sources](https://github.com/Onurtag/Mp3tag-Sources) by [Onurtag](https://github.com/Onurtag) that is based on [original script](https://community.mp3tag.de/t/ws-vocadb-net/17192) by [PBX_g33k](https://gist.github.com/PBXg33k)! Check [ORIGINAL_README.md](ORIGINAL_README.md) for more information
 
 ## Installation  
 Requires Mp3tag v2.64 or above.  
